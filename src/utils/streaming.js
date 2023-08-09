@@ -42,6 +42,7 @@ function handleStreamingData(data) {
 
   // Send data to every subscriber of that symbol
   subscriptionItem.handlers.forEach((handler) => handler.callback(bar))
+  channelToSubscription.set(channelString, subscriptionItem)
 }
 
 function startStreaming(retries = 3, delay = 3000) {
@@ -120,11 +121,6 @@ export function subscribeOnStream(
     callback: onRealtimeCallback,
   }
   let subscriptionItem = channelToSubscription.get(channelString)
-  if (subscriptionItem) {
-    // Already subscribed to the channel, use the existing subscription
-    subscriptionItem.handlers.push(handler)
-    return
-  }
   subscriptionItem = {
     subscriberUID,
     resolution,
@@ -150,18 +146,13 @@ export function unsubscribeFromStream(subscriberUID) {
     )
 
     if (handlerIndex !== -1) {
-      // Remove from handlers
-      subscriptionItem.handlers.splice(handlerIndex, 1)
-
-      if (subscriptionItem.handlers.length === 0) {
-        // Unsubscribe from the channel if it is the last handler
-        console.log(
-          '[unsubscribeBars]: Unsubscribe from streaming. Channel:',
-          channelString
-        )
-        channelToSubscription.delete(channelString)
-        break
-      }
+      // Unsubscribe from the channel if it is the last handler
+      console.log(
+        '[unsubscribeBars]: Unsubscribe from streaming. Channel:',
+        channelString
+      )
+      channelToSubscription.delete(channelString)
+      break
     }
   }
 }

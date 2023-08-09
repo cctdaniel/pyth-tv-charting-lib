@@ -14,7 +14,7 @@ function TradingViewChart() {
         library_path: chartingLibraryPath,
         datafeed: datafeed,
         symbol: 'BTCUSD',
-        interval: '1' as ResolutionString,
+        interval: '1W' as ResolutionString,
         fullscreen: true,
         debug: true,
       })

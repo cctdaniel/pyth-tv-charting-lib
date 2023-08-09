@@ -16,6 +16,11 @@ const datafeed = {
   },
   searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {
     console.log('[searchSymbols]: Method call')
+    fetch(`${API_ENDPOINT}/search?query=${userInput}`).then((response) => {
+      response.json().then((data) => {
+        onResultReadyCallback(data)
+      })
+    })
   },
   resolveSymbol: (
     symbolName,
@@ -56,9 +61,6 @@ const datafeed = {
             return
           }
           const bars = []
-          const meta = {
-            noData: false,
-          }
           for (let i = 0; i < data.t.length; ++i) {
             bars.push({
               time: data.t[i] * 1000,
@@ -69,7 +71,6 @@ const datafeed = {
             })
           }
           if (firstDataRequest) {
-            console.log(symbolInfo.ticker, 'First request')
             lastBarsCache.set(symbolInfo.ticker, {
               ...bars[bars.length - 1],
             })
@@ -99,7 +100,7 @@ const datafeed = {
       onRealtimeCallback,
       subscriberUID,
       onResetCacheNeededCallback,
-      lastBarsCache.get(symbolInfo.full_name)
+      lastBarsCache.get(symbolInfo.ticker)
     )
   },
   unsubscribeBars: (subscriberUID) => {
