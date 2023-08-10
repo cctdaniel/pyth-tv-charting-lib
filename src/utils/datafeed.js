@@ -1,6 +1,6 @@
 import { subscribeOnStream, unsubscribeFromStream } from './streaming.js'
 
-const API_ENDPOINT = 'http://0.0.0.0:8080/v1/shims/tradingview'
+const API_ENDPOINT = 'https://benchmarks.pyth.network/v1/shims/tradingview'
 
 // Use it to keep a record of the most recent bar on the chart
 const lastBarsCache = new Map()

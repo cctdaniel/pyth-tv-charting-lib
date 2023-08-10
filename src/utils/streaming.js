@@ -1,5 +1,5 @@
 // Assuming you're working in a browser environment that supports fetch and ReadableStream
-const streamingUrl = 'http://0.0.0.0:8080/v1/shims/tradingview/streaming'
+const streamingUrl = 'https://benchmarks.pyth.network/v1/shims/tradingview/streaming'
 const channelToSubscription = new Map()
 
 function handleStreamingData(data) {
