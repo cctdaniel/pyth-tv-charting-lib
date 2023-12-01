@@ -16,7 +16,9 @@ const datafeed = {
   },
   searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {
     console.log('[searchSymbols]: Method call')
-    fetch(`${API_ENDPOINT}/search?query=${userInput}`).then((response) => {
+    fetch(
+      `${API_ENDPOINT}/search?query=${userInput}`
+    ).then((response) => {
       response.json().then((data) => {
         onResultReadyCallback(data)
       })
@@ -32,6 +34,7 @@ const datafeed = {
       response
         .json()
         .then((symbolInfo) => {
+          console.log('[resolveSymbol]: Symbol resolved', symbolInfo)
           onSymbolResolvedCallback(symbolInfo)
         })
         .catch((error) => {
