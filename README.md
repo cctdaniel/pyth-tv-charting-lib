@@ -22,4 +22,4 @@ Nextjs is React Sever Side Rendering Framework for React with zero-configuration
 
 ## About This Project
 
-This project was bootstrapped with [NextJs](https://github.com/vercel/next.js).
+This project was bootstrapped with [NextJs](https://github.com/vercel/next.js)
