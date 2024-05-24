@@ -16,9 +16,7 @@ const datafeed = {
   },
   searchSymbols: (userInput, exchange, symbolType, onResultReadyCallback) => {
     console.log('[searchSymbols]: Method call')
-    fetch(
-      `${API_ENDPOINT}/search?query=${userInput}`
-    ).then((response) => {
+    fetch(`${API_ENDPOINT}/search?query=${userInput}`).then((response) => {
       response.json().then((data) => {
         onResultReadyCallback(data)
       })
@@ -53,38 +51,49 @@ const datafeed = {
   ) => {
     const { from, to, firstDataRequest } = periodParams
     console.log('[getBars]: Method call', symbolInfo, resolution, from, to)
-    fetch(
-      `${API_ENDPOINT}/history?symbol=${symbolInfo.ticker}&from=${periodParams.from}&to=${periodParams.to}&resolution=${resolution}`
-    ).then((response) => {
-      response
-        .json()
-        .then((data) => {
-          if (data.t.length === 0) {
-            onHistoryCallback([], { noData: true })
-            return
-          }
-          const bars = []
-          for (let i = 0; i < data.t.length; ++i) {
-            bars.push({
-              time: data.t[i] * 1000,
-              low: data.l[i],
-              high: data.h[i],
-              open: data.o[i],
-              close: data.c[i],
+
+    const maxRangeInSeconds = 365 * 24 * 60 * 60 // 1 year in seconds
+
+    let promises = []
+    let currentFrom = from
+    let currentTo
+
+    while (currentFrom < to) {
+      currentTo = Math.min(to, currentFrom + maxRangeInSeconds)
+      const url = `${API_ENDPOINT}/history?symbol=${symbolInfo.ticker}&from=${currentFrom}&to=${currentTo}&resolution=${resolution}`
+      promises.push(fetch(url).then((response) => response.json()))
+      currentFrom = currentTo
+    }
+
+    Promise.all(promises)
+      .then((results) => {
+        const bars = []
+        results.forEach((data) => {
+          if (data.t.length > 0) {
+            data.t.forEach((time, index) => {
+              bars.push({
+                time: time * 1000,
+                low: data.l[index],
+                high: data.h[index],
+                open: data.o[index],
+                close: data.c[index],
+              })
             })
           }
-          if (firstDataRequest) {
-            lastBarsCache.set(symbolInfo.ticker, {
-              ...bars[bars.length - 1],
-            })
-          }
-          onHistoryCallback(bars, { noData: false })
         })
-        .catch((error) => {
-          console.log('[getBars]: Get error', error)
-          onErrorCallback(error)
-        })
-    })
+
+        if (firstDataRequest && bars.length > 0) {
+          lastBarsCache.set(symbolInfo.ticker, {
+            ...bars[bars.length - 1],
+          })
+        }
+
+        onHistoryCallback(bars, { noData: bars.length === 0 })
+      })
+      .catch((error) => {
+        console.log('[getBars]: Get error', error)
+        onErrorCallback(error)
+      })
   },
   subscribeBars: (
     symbolInfo,
